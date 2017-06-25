@@ -123,6 +123,12 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
+          assert(ptsx.size() == ptsy.size());
+          for (size_t i = 0; i < ptsx.size(); i++) {
+            // MARK: The global to local translation equation is obtained from https://gamedev.stackexchange.com/a/109377
+            next_x_vals.push_back((ptsx.at(i)-px)*cos(psi)+(ptsy.at(i)-py)*sin(psi));
+            next_y_vals.push_back(-(ptsx.at(i)-px)*sin(psi)+(ptsy.at(i)-py)*cos(psi));
+          }
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
