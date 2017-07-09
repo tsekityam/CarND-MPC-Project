@@ -117,6 +117,12 @@ int main() {
           }
           auto coeffs = polyfit(pts_x, pts_y, 3);
 
+          double cte = polyeval(coeffs, 0);
+          double epsi = -atan(coeffs[1]);
+
+          Eigen::VectorXd state(6);
+          state << 0, 0, 0, v, cte, epsi;
+
           double steer_value;
           double throttle_value;
 
