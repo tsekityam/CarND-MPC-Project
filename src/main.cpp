@@ -92,6 +92,16 @@ int main() {
           double psi = j[1]["psi"];
           double v = j[1]["speed"];
 
+          assert(ptsx.size() == ptsy.size());
+          for (size_t i = 0; i < ptsx.size(); i++) {
+            // Translate waypoints from global coordinate system to local coordinate system
+            // The translation equation is obtained from https://gamedev.stackexchange.com/a/109377
+            double x = ptsx[i];
+            double y = ptsy[i];
+            ptsx[i] = (x-px)*cos(psi)+(y-py)*sin(psi);
+            ptsy[i] = -(x-px)*sin(psi)+(y-py)*cos(psi);
+          }
+
           /*
           * TODO: Calculate steering angle and throttle using MPC.
           *
@@ -125,9 +135,8 @@ int main() {
           // the points in the simulator are connected by a Yellow line
           assert(ptsx.size() == ptsy.size());
           for (size_t i = 0; i < ptsx.size(); i++) {
-            // MARK: The global to local translation equation is obtained from https://gamedev.stackexchange.com/a/109377
-            next_x_vals.push_back((ptsx.at(i)-px)*cos(psi)+(ptsy.at(i)-py)*sin(psi));
-            next_y_vals.push_back(-(ptsx.at(i)-px)*sin(psi)+(ptsy.at(i)-py)*cos(psi));
+            next_x_vals.push_back(ptsx[i]);
+            next_y_vals.push_back(ptsy[i]);
           }
 
           msgJson["next_x"] = next_x_vals;
