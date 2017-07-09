@@ -108,6 +108,15 @@ int main() {
           * Both are in between [-1, 1].
           *
           */
+
+          Eigen::VectorXd pts_x(ptsx.size());
+          Eigen::VectorXd pts_y(ptsy.size());
+          for (size_t i = 0; i < ptsx.size(); i++) {
+            pts_x[i] = ptsx[i];
+            pts_y[i] = ptsy[i];
+          }
+          auto coeffs = polyfit(pts_x, pts_y, 3);
+
           double steer_value;
           double throttle_value;
 
