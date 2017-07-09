@@ -4,6 +4,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
+#include <cppad/cppad.hpp>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
 #include "MPC.h"
@@ -11,6 +12,7 @@
 
 // for convenience
 using json = nlohmann::json;
+using CppAD::AD;
 
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
@@ -93,13 +95,36 @@ int main() {
           double v = j[1]["speed"];
 
           assert(ptsx.size() == ptsy.size());
+
+          // the waypoints coordinates in the car's coordinate system at current time.
+          vector<double> ptsx_cur = j[1]["ptsx"];
+          vector<double> ptsy_cur = j[1]["ptsy"];
+
+          for (size_t i = 0; i < ptsx.size(); i++) {
+            // Translate waypoints from global coordinate system to local coordinate system
+            // The translation equation is obtained from https://gamedev.stackexchange.com/a/109377
+            double x = ptsx_cur[i];
+            double y = ptsy_cur[i];
+            ptsx_cur[i] = (x-px)*cos(psi)+(y-py)*sin(psi);
+            ptsy_cur[i] = -(x-px)*sin(psi)+(y-py)*cos(psi);
+          }
+
+          // predict the status of the car after 100ms
+          double dt = 0.1;
+          double px_pre = px + v * CppAD::cos(psi) * dt;
+          double py_pre = py + v * CppAD::sin(psi) * dt;
+
+          // the waypoints coordinates in the car's coordinate system after 100ms.
+          Eigen::VectorXd ptsx_pre(ptsx.size());
+          Eigen::VectorXd ptsy_pre(ptsy.size());
+
           for (size_t i = 0; i < ptsx.size(); i++) {
             // Translate waypoints from global coordinate system to local coordinate system
             // The translation equation is obtained from https://gamedev.stackexchange.com/a/109377
             double x = ptsx[i];
             double y = ptsy[i];
-            ptsx[i] = (x-px)*cos(psi)+(y-py)*sin(psi);
-            ptsy[i] = -(x-px)*sin(psi)+(y-py)*cos(psi);
+            ptsx_pre[i] = (x-px_pre)*cos(psi)+(y-py_pre)*sin(psi);
+            ptsy_pre[i] = -(x-px_pre)*sin(psi)+(y-py_pre)*cos(psi);
           }
 
           /*
@@ -109,13 +134,7 @@ int main() {
           *
           */
 
-          Eigen::VectorXd pts_x(ptsx.size());
-          Eigen::VectorXd pts_y(ptsy.size());
-          for (size_t i = 0; i < ptsx.size(); i++) {
-            pts_x[i] = ptsx[i];
-            pts_y[i] = ptsy[i];
-          }
-          auto coeffs = polyfit(pts_x, pts_y, 3);
+          auto coeffs = polyfit(ptsx_pre, ptsy_pre, 3);
 
           double cte = polyeval(coeffs, 0);
           double epsi = -atan(coeffs[1]);
@@ -155,9 +174,9 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
-          for (size_t i = 0; i < ptsx.size(); i++) {
-            next_x_vals.push_back(ptsx[i]);
-            next_y_vals.push_back(ptsy[i]);
+          for (size_t i = 0; i < ptsx_cur.size(); i++) {
+            next_x_vals.push_back(ptsx_cur[i]);
+            next_y_vals.push_back(ptsy_cur[i]);
           }
 
           msgJson["next_x"] = next_x_vals;
