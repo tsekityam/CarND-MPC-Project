@@ -155,7 +155,6 @@ int main() {
 
           //.. add (x,y) points to list here, points are in reference to the vehicle's coordinate system
           // the points in the simulator are connected by a Yellow line
-          assert(ptsx.size() == ptsy.size());
           for (size_t i = 0; i < ptsx.size(); i++) {
             next_x_vals.push_back(ptsx[i]);
             next_y_vals.push_back(ptsy[i]);
