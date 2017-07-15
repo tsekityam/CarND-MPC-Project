@@ -1,4 +1,20 @@
-# Model Predictive Control with Latency
+# Output video
+
+The recording of how the car runs can be found in [YouTube](https://youtu.be/1aXoKFIXZTk). I tried to record it using QuickTime, however, I found that the car would run out of the road if QuickTime recording is on. I believed that QuickTime introduced extra latency to the program.
+
+# Discussion
+
+## Timestep Length and Elapsed Duration (N & dt)
+
+`N` and `dt` are for getting the line that car should be followed, such that the car will reach the waypoints desired. The values I chose are shown in Q&A session.
+
+## Polynomial Fitting and MPC Preprocessing
+
+The waypoints given by the simulator are in global coordinate system. I covert these points into local coordinate system of the car. i.e. the car in {0, 0} of the system, and it has 0 degree to the axis.
+
+I use the waypoints in the local coordinate system to perform the polynomial fitting and do the predication.
+
+## Model Predictive Control with Latency
 _MPC.cpp_ is my project is based on the my solution on the quiz and inspired by the code shown in Q&A session.
 
 If I use the speed I used in the quiz, which is , 40km/h,, then the car can finish a lap perfectly, however, if I increase the value to 100km/h, which is used by the instructors in Q&A session, then my car will go out of the track.
