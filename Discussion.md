@@ -6,7 +6,19 @@ The recording of how the car runs can be found in [YouTube](https://youtu.be/1aX
 
 ## Timestep Length and Elapsed Duration (N & dt)
 
-`N` and `dt` are for getting the line that car should be followed, such that the car will reach the waypoints desired. The values I chose are shown in Q&A session.
+`N` and `dt` are for getting the line that car should be followed, such that the car will reach the waypoints desired.
+
+Multiply `N` and `dt`, we will have a time `t`, which is the duration of the best path we want to find out. Let say we have `N = 10; t = 0.1; t = 1`. Then we will find out the best path of the car in next 1s.
+
+If `t` is too large, let say `t = 10s`, then we the _best_ path we found out may be very bad. It is because we have not enough information to support the path found. We only have a limited number of waypoints for referencing in each calculation, which may only shows what should the car follows in the next 1s. We can't use 1s info to tell where should the car goes for next 10s. The end point of the _best_ path we found may be completely different from the real point the car should reach after 10s.
+
+If `t` is too small, let say `t = 0.0001s`, then the _best_ path we found may not be able to handle future changes well. If our car is running with 100km/h, and we only try to consider where should the car goes in next 0.0001s, which means we only find the best path for next 0.278cm. Then the car will pretend to keep running on a straight line, because the referencing line always looks like a straight line and the car never knows that it is running on a curve it has to turn.
+
+If `N` is too large, let say `N = 1000` then we may have involve too many points in calculation, which slow down the calculation and cause extra delay. If we have large delay, the the efficiency of our controller will be lower, and the accuracy of the best path we find may be lower too.
+
+If `N` is too small, let say `N = 2`, then we may not have enough points involved in the calculation, and the characteristic of referencing line may be lost in calculation. For example, when `N = 2`, we have two points for calculation, and these two points always form a straight line. In this case, the car may thing that the referencing line is straight line, although the referencing line can be a cause. Then the car will pretend to keep running on a straight line, just like what we have in the case that `t` is too small.
+
+I used the values of `N` and `dt` shown in Q&A session, and I found that the best path found is acceptable, so I chose to use these two value in my project.
 
 ## Polynomial Fitting and MPC Preprocessing
 
